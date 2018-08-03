@@ -14,10 +14,8 @@ import os.path
 
 # TODO: Currently the bounding boxes are drawn without showing the object's class on top of the bounding box
 def runDetection(path,orgName):
-    #note: orgName is "original name"
-    print "I MADE IT HERE"
     # Make sure that caffe is on the python path:
-    caffe_root = '/home/paperspace/dev/caffe'  # this file is expected to be in {caffe_root}/examples
+    caffe_root = ''  # this file is expected to be in {caffe_root}/examples
     import os
     os.chdir(caffe_root)
     import sys
@@ -31,7 +29,8 @@ def runDetection(path,orgName):
     from caffe.proto import caffe_pb2
 
     # load PASCAL VOC labels
-    labelmap_file = '/home/paperspace/dev/caffe/data/VOC0712/labelmap_voc.prototxt'
+
+    labelmap_file = '' #provide labelmap file
     file = open(labelmap_file, 'r')
     labelmap = caffe_pb2.LabelMap()
     text_format.Merge(str(file.read()), labelmap)
@@ -55,19 +54,19 @@ def runDetection(path,orgName):
     fvs = FileVideoStream(path).start()
     time.sleep(1.0)
     
-    model_def = '/home/paperspace/dev/caffe/models/VGGNet/VOC0712/SSD_300x300/deploy.prototxt'
-    model_weights = '/home/paperspace/dev/caffe/models/VGGNet/VOC0712/SSD_300x300/VGG_VOC0712_SSD_300x300_iter_120000.caffemodel'
+    model_def = '' #provide your model file (.prototxt)
+    model_weights = '' #provide your model weights (.caffemodel)
 
     net = caffe.Net(model_def,      # defines the structure of the model
                         model_weights,  # contains the trained weights
                         caffe.TEST)     # use test mode (e.g., don't perform dropout)
     
-    if os.path.isfile("/home/paperspace/dev/caffe/uploadResults/output.wmv"):
-        os.remove("/home/paperspace/dev/caffe/uploadResults/output.wmv")
+    if os.path.isfile("./output.wmv"):
+        os.remove("./output.wmv")
         
     #the output file is stored as wmv initially since the video writer can't handle mp4 formats, I change the wmv format to mp4 
     #later on
-    uploadResultPath = "/home/paperspace/dev/caffe/uploadResults/output.wmv"
+    uploadResultPath = "./output.wmv"
     # start the FPS timer
     fps = FPS().start()
     frame = fvs.read()
@@ -87,7 +86,7 @@ def runDetection(path,orgName):
     while fvs.more():
         frame = fvs.read()
         print "NEW FRAME LOADED"
-        inputPath = "/home/paperspace/dev/caffe/uploadResults/frame"+str(counter)+".jpg"
+        inputPath = "./frame"+str(counter)+".jpg"
         cv2.imwrite(inputPath, frame) #path instead of inputPath
         
         
@@ -153,7 +152,7 @@ def runDetection(path,orgName):
 
         if goodFrame == 1:
             print "DETECTION(S) OCCURED ON THE CURRENT FRAME"
-            outPath = "/home/paperspace/dev/caffe/uploadResults/outFrame"+str(counter)+".jpg"
+            outPath = "./outFrame"+str(counter)+".jpg"
             cv2.imwrite(outPath, frame)
             resizedImage = cv2.resize(cv2.imread(outPath), (width, height), interpolation = cv2.INTER_AREA)
             cv2.imwrite(outPath, resizedImage)
@@ -175,17 +174,17 @@ def runDetection(path,orgName):
     # stop the timer and release the video
     video.release()
     fps.stop()
-    if os.path.isfile('/home/paperspace/dev/caffe/uploadResults/'+orgName+'.mp4'):
-        os.remove('/home/paperspace/dev/caffe/uploadResults/'+orgName+'.mp4')
+    if os.path.isfile('./'+orgName+'.mp4'):
+        os.remove('./'+orgName+'.mp4')
         
         #here I change the output format from the wmv file to an mp4 format with the file's original name:
-        os.system('cd /home/paperspace/dev/caffe/uploadResults/; ffmpeg -i output.wmv -s 1920x1080 '+orgName+'.mp4')
-        uploadResultPath = '/home/paperspace/dev/caffe/uploadResults/'+orgName+'.mp4'
+        os.system('cd ./; ffmpeg -i output.wmv -s 1920x1080 '+orgName+'.mp4')
+        uploadResultPath = './'+orgName+'.mp4'
         
     else:
         #here I change the output format from the wmv file to an mp4 format with the file's original name:
-        os.system('cd /home/paperspace/dev/caffe/uploadResults/; ffmpeg -i output.wmv -s 1920x1080 '+orgName+'.mp4')
-        uploadResultPath = '/home/paperspace/dev/caffe/uploadResults/'+orgName+'.mp4'
+        os.system('cd ./; ffmpeg -i output.wmv -s 1920x1080 '+orgName+'.mp4')
+        uploadResultPath = './'+orgName+'.mp4'
 
     print("[INFOcd] elasped time: {:.2f}".format(fps.elapsed()))
     print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
@@ -193,6 +192,6 @@ def runDetection(path,orgName):
     # do a bit of cleanup
     cv2.destroyAllWindows()
     fvs.stop()
-    os.remove('/home/paperspace/dev/caffe/uploads/'+orgName+'.mp4')
+    os.remove('./'+orgName+'.mp4')
     return uploadResultPath
 
